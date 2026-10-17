@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#176b50">\n<link rel="manifest" href="./manifest.webmanifest">\n<link rel="icon" href="./icons/icon-192.png">
+<title>Calculadora de recarga EV</title>
+<style>
+:root{color-scheme:light;--green:#176b50;--green2:#e1f4eb;--ink:#17221e;--muted:#65736d;--line:#dce5e0;--bg:#f4f7f5;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:650px;margin:auto;padding:18px 14px 34px}
+header{background:var(--green);color:white;padding:22px 20px;border-radius:22px;margin-bottom:16px;box-shadow:0 5px 18px #123b2b18}
+header .eyebrow{font-size:.78rem;opacity:.85;text-transform:uppercase;letter-spacing:.08em}
+h1{font-size:1.55rem;margin:4px 0 3px}
+header p{margin:0;opacity:.9;font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 2px 8px #102d2010}
+h2{font-size:1.04rem;margin:0 0 14px}
+label{display:block;font-size:.9rem;font-weight:650;margin:12px 0 6px}
+input,select{width:100%;min-height:48px;border:1px solid #cbd7d0;border-radius:11px;padding:11px 12px;font:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #79c4a4;border-color:var(--green)}
+small,.hint{color:var(--muted);font-size:.82rem}
+.type{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type button{border:1px solid var(--line);border-radius:12px;padding:12px 8px;background:#fff;font:inherit;font-weight:700;color:var(--ink)}
+.type button.active{border-color:var(--green);background:var(--green2);color:var(--green)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rangehead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rangehead output{font-weight:800;color:var(--green);font-size:1.1rem}
+input[type=range]{padding:0;min-height:30px;accent-color:var(--green);border:0}
+.result{background:var(--green);color:white;border-radius:17px;padding:18px;margin:12px 0}
+.result .caption{font-size:.9rem;opacity:.9}
+.cost{font-size:2.25rem;line-height:1.15;font-weight:850;margin:4px 0 10px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{background:#ffffff15;border:1px solid #ffffff32;border-radius:13px;padding:12px}
+.metric span{display:block;font-size:.78rem;opacity:.86;margin-bottom:4px}
+.metric strong{font-size:1.12rem}
+.bar{height:10px;background:#ffffff40;border-radius:20px;overflow:hidden;margin:12px 0 4px}
+.bar div{height:100%;background:#a9f0c9}
+.note{background:#f2f7f4;border-radius:12px;padding:12px;color:#4d5e55;font-size:.84rem;margin-top:12px}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px}
+.hidden{display:none!important}
+button:active{transform:scale(.99)}
+@media(min-width:540px){main{padding-top:28px}.row.wide{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">Para tu Leapmotor B10</div>
+  <h1>Calculadora de recarga</h1>
+  <p>Calcula cuánto pagarás y cuánto tardará la carga.</p>
+</header>
+
+<section class="card">
+  <h2>1. Datos del cargador</h2>
+  <label for="battery">Capacidad de batería (kWh)</label>
+  <input id="battery" type="number" inputmode="decimal" min="1" step="0.1" value="67.1">
+  <label>Tipo de carga</label>
+  <div class="type">
+    <button type="button" id="acBtn" class="active" aria-pressed="true">AC · Normal</button>
+    <button type="button" id="dcBtn" aria-pressed="false">DC · Rápida</button>
+  </div>
+  <label for="power">Potencia anunciada del cargador (kW)</label>
+  <input id="power" type="number" inputmode="decimal" min="0.1" step="1" value="11">
+  <div id="acHint" class="hint">En AC, el cálculo limita la potencia a 11 kW para tu B10.</div>
+  <div id="dcField" class="hidden">
+    <label for="average">Potencia media estimada que recibirá el coche (kW)</label>
+    <input id="average" type="number" inputmode="decimal" min="0.1" step="1" value="110">
+    <div class="hint">La potencia DC varía durante la carga. Usa una media realista; no siempre coincide con la potencia máxima del poste.</div>
+  </div>
+  <label for="price">Precio (€/kWh)</label>
+  <input id="price" type="number" inputmode="decimal" min="0" step="0.001" value="0.39">
+</section>
+
+<section class="card">
+  <h2>2. Porcentaje de batería</h2>
+  <div class="rangehead"><label for="start" style="margin-top:0">Batería inicial</label><output id="startOut">20%</output></div>
+  <input id="start" type="range" min="0" max="95" step="5" value="20">
+  <div class="rangehead"><label for="end" style="margin-top:10px">Batería final</label><output id="endOut">80%</output></div>
+  <input id="end" type="range" min="5" max="100" step="5" value="80">
+  <label for="loss">Pérdidas de carga estimadas (%)</label>
+  <input id="loss" type="number" inputmode="decimal" min="0" max="99" step="1" value="10">
+  <div class="hint">Estimación de la electricidad que se pierde entre el poste y la batería. Valor inicial: 10 %.</div>
+</section>
+
+<section class="result" aria-live="polite">
+  <div class="caption">COSTE TOTAL ESTIMADO</div>
+  <div class="cost" id="cost">17,15 €</div>
+  <div class="metrics">
+    <div class="metric"><span>Energía a la batería</span><strong id="batteryKwh">40,26 kWh</strong></div>
+    <div class="metric"><span>Energía facturada</span><strong id="gridKwh">44,73 kWh</strong></div>
+    <div class="metric"><span>Potencia calculada</span><strong id="effective">11 kW</strong></div>
+    <div class="metric"><span>Tiempo estimado</span><strong id="time">4 h 4 min</strong></div>
+  </div>
+  <div class="bar"><div id="barFill" style="width:60%"></div></div>
+  <div class="caption" id="rangeText">Del 20 % al 80 % de batería</div>
+</section>
+<div class="note" id="warning">El resultado es orientativo. El tiempo real depende de la temperatura, la potencia disponible y la gestión de carga del vehículo. La carga rápida suele reducir potencia cuando la batería se acerca a un nivel alto.</div>
+<div style="padding:0 2px"><button type="button" id="reset" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--green);font:inherit;font-weight:750">Restablecer valores iniciales</button></div>
+<footer>Calculadora orientativa · No incluye posibles tarifas por minuto, ocupación o sesión.</footer>
+</main>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ let type = 'AC';
+ const num = id => Number($(id).value);
+ const fmt = (n,d=2) => Number(n).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+ function setType(t){
+   type=t;
+   $('acBtn').classList.toggle('active',t==='AC');
+   $('dcBtn').classList.toggle('active',t==='DC');
+   $('acBtn').setAttribute('aria-pressed',String(t==='AC'));
+   $('dcBtn').setAttribute('aria-pressed',String(t==='DC'));
+   $('acHint').classList.toggle('hidden',t!=='AC');
+   $('dcField').classList.toggle('hidden',t!=='DC');
+   calculate();
+ }
+ function calculate(){
+   const battery=num('battery'), power=num('power'), price=num('price'), start=num('start'), end=num('end'), loss=num('loss');
+   $('startOut').textContent=start+'%'; $('endOut').textContent=end+'%';
+   const valid=[battery,power,price,start,end,loss].every(Number.isFinite) && battery>0 && power>0 && price>=0 && start>=0 && end<=100 && start<end && loss>=0 && loss<100 && (type!=='DC'||(num('average')>0&&Number.isFinite(num('average'))));
+   if(!valid){$('cost').textContent='Revisa los datos';['batteryKwh','gridKwh','effective','time'].forEach(id=>$(id).textContent='—');$('rangeText').textContent='La batería final debe superar a la inicial.';return;}
+   const energy=battery*(end-start)/100;
+   const grid=energy/(1-loss/100);
+   const effective=Math.min(power,type==='AC'?11:num('average'));
+   const minutes=grid/effective*60;
+   $('cost').textContent=fmt(grid*price)+' €';
+   $('batteryKwh').textContent=fmt(energy)+' kWh';
+   $('gridKwh').textContent=fmt(grid)+' kWh';
+   $('effective').textContent=fmt(effective,1)+' kW';
+   const total=Math.round(minutes);
+   $('time').textContent=Math.floor(total/60)+' h '+(total%60)+' min';
+   $('rangeText').textContent='Del '+start+' % al '+end+' % de batería';
+   $('barFill').style.width=(end-start)+'%';
+   $('warning').textContent=type==='DC'
+    ?'Tiempo calculado con la potencia media que has introducido. En DC la potencia varía con el porcentaje y la temperatura de la batería; el resultado real puede ser mayor.'
+    :'En AC se limita la potencia a 11 kW para tu B10. El tiempo real puede variar y los puntos AC de 22 kW no harán que el coche cargue a 22 kW.';
+ }
+ ['battery','power','price','start','end','loss','average'].forEach(id=>$(id).addEventListener('input',calculate));
+ $('acBtn').addEventListener('click',()=>setType('AC'));
+ $('dcBtn').addEventListener('click',()=>setType('DC'));
+ $('reset').addEventListener('click',()=>{
+   $('battery').value='67.1';$('power').value='11';$('price').value='0.39';
+   $('start').value='20';$('end').value='80';$('loss').value='10';$('average').value='110';setType('AC');
+ });
+ calculate();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>

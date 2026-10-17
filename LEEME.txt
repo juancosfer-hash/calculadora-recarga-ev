@@ -1,0 +1,24 @@
+CALCULADORA DE RECARGA EV — PAQUETE WEB INSTALABLE
+
+IMPORTANTE:
+Este paquete está preparado como PWA, pero para que Chrome muestre "Instalar aplicación"
+debe estar publicado en una dirección HTTPS. Abrir index.html como archivo local no basta.
+
+ARCHIVOS:
+- index.html: calculadora
+- manifest.webmanifest: nombre e icono de la aplicación
+- sw.js: caché para usarla sin conexión después de la primera visita
+- icons/: iconos de la aplicación
+
+PUBLICACIÓN GRATUITA (GitHub Pages):
+1. Entra en https://github.com y crea una cuenta/inicia sesión.
+2. Crea un repositorio nuevo, por ejemplo: calculadora-recarga-ev
+3. Sube TODOS los archivos y carpetas de este paquete a la raíz del repositorio.
+4. En el repositorio abre Settings > Pages.
+5. En "Build and deployment", selecciona "Deploy from a branch", rama "main" y carpeta "/ (root)", y guarda.
+6. Espera a que GitHub Pages te dé una URL HTTPS.
+7. Abre esa URL en Chrome en tu Honor.
+8. Pulsa ⋮ y busca "Instalar aplicación" o "Añadir a pantalla de inicio".
+9. Tras abrirla una vez con conexión, la calculadora podrá funcionar sin conexión en visitas posteriores.
+
+No compartas contraseñas ni datos personales. GitHub Pages publica estos archivos en internet; el paquete no contiene información personal.
